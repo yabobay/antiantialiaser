@@ -24,12 +24,6 @@ int main(int argc, char **argv) {
     puts("Error: can't use the -r option with -o or -d");
   // ↓ closest possible approximate to "if --help was not called"
   else if (returnvalue = 0, args.infilec) {
-    /* printf("Error: %d\n", args.e); */
-    /* printf("Verbose: %d\n", args.verbose); */
-    /* printf("Output: %s\n", args.outfile); */
-    /* printf("Resolution: %d\n", args.resolution); */
-    /* printf("Files to process: %d\n", args.infilec); */
-
     char *outfile = NULL;
     InitializeMagick(NULL);
     Image *img = NULL;
@@ -40,7 +34,6 @@ int main(int argc, char **argv) {
         
     for (int i = 0; i < args.infilec; i++) {
       imgInfo = CloneImageInfo(0); // initialize empty image
-      /* printf("Input file: %s\n", args.infiles[i]); */
       // read the image from disk
       strcpy(imgInfo->filename, args.infiles[i]);
       img = ReadImage(imgInfo, e);
@@ -57,8 +50,6 @@ int main(int argc, char **argv) {
         unsigned int ty = args.resolution; // t is for target
         double multiplier = (double) args.resolution / (double) img->rows;
         unsigned int tx = (int) ((double) x * multiplier);
-        /* printf("Image resolution: %ux%u\n", x, y); */
-        /* printf("Target resolution: %ux%u\n", tx, ty); */
         if (ty <= y)
           fprintf(stderr, "WARNING: %s is bigger than %dp. Won't resize.\n",
                   args.infiles[i], ty);
@@ -68,7 +59,6 @@ int main(int argc, char **argv) {
           CatchException(e);
           // write new image to disk
           strcpy(out->filename, outfile);
-          /* printf("Output file: %s\n", out->filename); */
           if (!WriteImage(imgInfo, out))
             CatchException(&out->exception);
         }
