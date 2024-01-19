@@ -39,7 +39,11 @@ int main(int argc, char **argv) {
       img = ReadImage(imgInfo, e);
       CatchException(e);
 
-      outfile = args.outfile ? args.outfile : duplicateFilename(args.infiles[i]);
+      if (args.replace)
+        outfile = imgInfo->filename;
+      else
+        outfile = args.outfile ?
+          args.outfile : duplicateFilename(args.infiles[i]);
 
       if (args.verbose)
         printf("%s -> %s\n", args.infiles[i], outfile);
@@ -64,7 +68,8 @@ int main(int argc, char **argv) {
         }
       }
 
-      free(outfile);
+      if (!args.replace)
+        free(outfile);
 
     }
 

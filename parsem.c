@@ -18,6 +18,7 @@ struct argp_option options[] = {
   {"size", 's', "N", 0, "Resolution to output (default: 720)"},
   {"replace", 'r', 0, 0, "Replace original files. (default: no)"},
   {"verbose", 'v', 0, 0, "Enable verbose mode"},
+  {"pretend", 'p', 0, OPTION_HIDDEN, 0, 0}, // AKA don't do anything
   {} // for some reason this makes unnamed arguments work properly
 };
 
@@ -45,6 +46,9 @@ error_t parse_opt (int key, char *arg, struct argp_state *state) {
     case 'r':
       arguments->replace = true;
       break;
+    case 'p':
+      arguments->pretend = true;
+      break;
     }
   else if (arg) { // argument is anonymous
     ++arguments->infilec;
@@ -58,6 +62,7 @@ error_t parse_opt (int key, char *arg, struct argp_state *state) {
 struct arguments parsem(int argc, char **argv) {
   struct arguments arguments;
 
+  // set default values
   arguments.verbose = false;
   arguments.outfile = NULL;
   arguments.resolution = DEFAULTRES;
@@ -65,6 +70,7 @@ struct arguments parsem(int argc, char **argv) {
   arguments.infilec = 0;
   arguments.directory = NULL;
   arguments.replace = false;
+  arguments.pretend = false;
  
   // we use ARGP_NO_EXIT so that main can free arguments.infiles later
   arguments.e = argp_parse(&argp, argc, argv, ARGP_NO_EXIT, 0, &arguments);

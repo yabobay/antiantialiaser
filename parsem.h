@@ -11,6 +11,7 @@ struct arguments {
   char *outfile;
   char *directory;
   bool replace;
+  bool pretend;
   error_t e; // basically just used in case of anything;
 };
 
