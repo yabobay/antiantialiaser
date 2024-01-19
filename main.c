@@ -37,39 +37,42 @@ int main(int argc, char **argv) {
       // read the image from disk
       strcpy(imgInfo->filename, args.infiles[i]);
       img = ReadImage(imgInfo, e);
-      CatchException(e);
 
-      if (args.replace)
-        outfile = imgInfo->filename;
-      else
-        outfile = args.outfile ?
-          args.outfile : duplicateFilename(args.infiles[i]);
+      if (e->severity)
+        CatchException(e);
+      else {
+        if (args.replace)
+          outfile = imgInfo->filename;
+        else
+          outfile = args.outfile ?
+            args.outfile : duplicateFilename(args.infiles[i]);
 
-      if (args.verbose)
-        printf("%s -> %s\n", args.infiles[i], outfile);
+        if (args.verbose)
+          printf("%s -> %s\n", args.infiles[i], outfile);
 
-      if (img != NULL) {
-        unsigned int x = img->columns;
-        unsigned int y = img->rows;
-        unsigned int ty = args.resolution; // t is for target
-        double multiplier = (double) args.resolution / (double) img->rows;
-        unsigned int tx = (int) ((double) x * multiplier);
-        if (ty <= y)
-          fprintf(stderr, "WARNING: %s is bigger than %dp. Won't resize.\n",
-                  args.infiles[i], ty);
-        else {
-          // TODO: ask about existing filename.
-          out = ScaleImage(img, tx, ty, e); // resize the image
-          CatchException(e);
-          // write new image to disk
-          strcpy(out->filename, outfile);
-          if (!WriteImage(imgInfo, out))
-            CatchException(&out->exception);
+        if (img != NULL) {
+          unsigned int x = img->columns;
+          unsigned int y = img->rows;
+          unsigned int ty = args.resolution; // t is for target
+          double multiplier = (double) args.resolution / (double) img->rows;
+          unsigned int tx = (int) ((double) x * multiplier);
+          if (ty <= y)
+            fprintf(stderr, "WARNING: %s is bigger than %dp. Won't resize.\n",
+                    args.infiles[i], ty);
+          else {
+            // TODO: ask about existing filename.
+            out = ScaleImage(img, tx, ty, e); // resize the image
+            CatchException(e);
+            // write new image to disk
+            strcpy(out->filename, outfile);
+            if (!WriteImage(imgInfo, out))
+              CatchException(&out->exception);
+          }
         }
-      }
 
-      if (!args.replace)
-        free(outfile);
+        if (!args.replace)
+          free(outfile);
+      }
 
     }
 
