@@ -8,6 +8,8 @@
 #include "parsem.h"
 #include "filenames.h"
 
+void upscaleImage(const char *infile, const char *outfile, int res, ExceptionInfo *e);
+
 int main(int argc, char **argv) {
 
   int returnvalue = 0;
@@ -26,66 +28,66 @@ int main(int argc, char **argv) {
   else if (returnvalue = 0, args.infilec) {
     char *outfile = NULL;
     InitializeMagick(NULL);
-    Image *img = NULL;
-    Image *out = NULL;
-    ImageInfo *imgInfo;
     ExceptionInfo *e;
     GetExceptionInfo(e);
-        
-    for (int i = 0; i < args.infilec; i++) {
-      imgInfo = CloneImageInfo(0); // initialize empty image
-      // read the image from disk
-      strcpy(imgInfo->filename, args.infiles[i]);
-      img = ReadImage(imgInfo, e);
 
+    for (int i = 0; i < args.infilec; i++) {
       if (e->severity)
         CatchException(e);
       else {
         if (args.replace)
-          outfile = imgInfo->filename;
+          outfile = args.infiles[i];
+        else if (args.outfile)
+          outfile = args.outfile;
         else
-          outfile = args.outfile ?
-            args.outfile : duplicateFilename(args.infiles[i]);
+          // TODO: check if file exists in same directory before doing this
+          outfile = duplicateFilename(args.infiles[i]);
 
         if (args.verbose)
           printf("%s -> %s\n", args.infiles[i], outfile);
 
-        if (img != NULL) {
-          unsigned int x = img->columns;
-          unsigned int y = img->rows;
-          unsigned int ty = args.resolution; // t is for target
-          double multiplier = (double) args.resolution / (double) img->rows;
-          unsigned int tx = (int) ((double) x * multiplier);
-          if (ty <= y)
-            fprintf(stderr, "WARNING: %s is bigger than %dp. Won't resize.\n",
-                    args.infiles[i], ty);
-          else {
-            // TODO: ask about existing filename.
-            out = ScaleImage(img, tx, ty, e); // resize the image
-            CatchException(e);
-            // write new image to disk
-            strcpy(out->filename, outfile);
-            if (!WriteImage(imgInfo, out))
-              CatchException(&out->exception);
-          }
-        }
-
-        if (!args.replace)
-          free(outfile);
+        upscaleImage(args.infiles[i], outfile, args.resolution, e);
       }
-
     }
 
-    DestroyImage(img);
-    DestroyImage(out);
-    DestroyImageInfo(imgInfo);
+    if (!args.replace)
+      free(outfile);
     DestroyExceptionInfo(e);
     DestroyMagick();
-
   }
   
   free(args.infiles);
 
   return returnvalue;
 
+}
+
+void upscaleImage(const char *infile, const char *outfile, int res, ExceptionInfo *e) {
+  // read the image from disk
+  ImageInfo *imgInfo = CloneImageInfo(0); // initialize empty image
+  strcpy(imgInfo->filename, infile);
+  Image *img = ReadImage(imgInfo, e);
+  Image *out;
+  CatchException(e);
+  if (img != NULL) {
+    unsigned int x = img->columns;
+    unsigned int y = img->rows;
+    unsigned int ty = res; // t is for target
+    double multiplier = (double) res / (double) img->rows;
+    unsigned int tx = (int) ((double) x * multiplier);
+    if (ty <= y) {
+      fprintf(stderr, "WARNING: %s is bigger than %dp. Won't resize.\n",
+              infile, ty);
+      tx = x; ty = y;
+    }
+    out = ScaleImage(img, tx, ty, e); // resize the image
+    CatchException(e);
+    // write new image to disk
+    strcpy(out->filename, outfile);
+    if (!WriteImage(imgInfo, out))
+      CatchException(&out->exception);
+  }
+  DestroyImage(img);
+  DestroyImage(out);
+  DestroyImageInfo(imgInfo);
 }
