@@ -1,12 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
+#define FILENAME_INDICATION " (copy)."
+
+bool fileExists(const char* filename) {
+  bool v = true;
+  FILE *f = fopen(filename, "r");
+  f ? fclose(f) : (v = false);
+  return v;
+}
+
+// includes the character
+char *chopUntilChar(const char *str, char c) {
+  char *chr = strrchr(str, c);
+  if (!chr)
+    return "";
+  return strdup(chr + 1);
+}
 
 char *filenameCoda(const char *filename) {
-  char *dot = strrchr(filename, '.');
-  if (!dot)
-    return "";
-  return strdup(dot + 1);
+  return chopUntilChar(filename, '.');
 }
 
 char *filenameOnset(const char *filename) {
@@ -18,8 +33,6 @@ char *filenameOnset(const char *filename) {
   return strndup(filename, (strlen(filename) - l) * sizeof(char));
 }
 
-#define FILENAME_INDICATION " (upscaled)."
-
 char *duplicateFilename(const char *filename) {
   char *x = malloc(sizeof(char) *
                    (strlen(filename) + strlen(FILENAME_INDICATION) - 1));
@@ -28,4 +41,8 @@ char *duplicateFilename(const char *filename) {
   sprintf(x, "%s%s%s", onset, FILENAME_INDICATION, coda);
   free(onset); free(coda);
   return x;
+}
+
+char *removePath(const char *filename) {
+  return chopUntilChar(filename, '/');
 }

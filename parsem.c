@@ -48,6 +48,7 @@ error_t parse_opt (int key, char *arg, struct argp_state *state) {
       break;
     case 'p':
       arguments->pretend = true;
+      arguments->verbose = true;
       break;
     }
   else if (arg) { // argument is anonymous

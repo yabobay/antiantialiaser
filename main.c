@@ -10,56 +10,61 @@
 
 void upscaleImage(const char *infile, const char *outfile, int res, ExceptionInfo *e);
 
-int main(int argc, char **argv) {
-
-  int returnvalue = 0;
+int main(int argc, char *argv[]) {
+  int returnvalue = 1;
 
   if (argc < 2)
     argv[argc++] = "--help"; // help 🥲
-
   struct arguments args = parsem(argc, argv);
 
-  returnvalue = 1;
   if (args.outfile && args.infilec > 1)
     puts("Error: can't process multiple files with the -o option");
   else if (args.replace && (args.outfile || args.directory))
     puts("Error: can't use the -r option with -o or -d");
+  else if (args.outfile && args.directory)
+    puts("Error: can't use the -o and -d flags together");
   // ↓ closest possible approximate to "if --help was not called"
   else if (returnvalue = 0, args.infilec) {
     char *outfile = NULL;
     InitializeMagick(NULL);
-    ExceptionInfo *e;
-    GetExceptionInfo(e);
+    ExceptionInfo e;
+    GetExceptionInfo(&e);
 
     for (int i = 0; i < args.infilec; i++) {
-      if (e->severity)
-        CatchException(e);
-      else {
-        if (args.replace)
-          outfile = args.infiles[i];
-        else if (args.outfile)
-          outfile = args.outfile;
-        else
-          // TODO: check if file exists in same directory before doing this
-          outfile = duplicateFilename(args.infiles[i]);
+      CatchException(&e);
 
-        if (args.verbose)
-          printf("%s -> %s\n", args.infiles[i], outfile);
-
-        upscaleImage(args.infiles[i], outfile, args.resolution, e);
+      if (args.directory) {
+        char *filename = removePath(args.infiles[i]);
+        int length = strlen(args.directory) + 1 + strlen(filename);
+        outfile = malloc(sizeof(char) * (length + 1));
+        sprintf(outfile, "%s/%s", args.directory, filename);
+        free(filename);
       }
+      else if (args.outfile)
+        outfile = strdup(args.outfile);
+      else
+        outfile = strdup(args.infiles[i]);
+
+      if (!args.replace)
+        while (fileExists(outfile)) {
+          char *tmp = outfile;
+          outfile = duplicateFilename(tmp);
+          free(tmp);
+        }
+
+      if (args.verbose)
+        printf("%s -> %s\n", args.infiles[i], outfile);
+      if (!args.pretend)
+        upscaleImage(args.infiles[i], outfile, args.resolution, &e);
     }
 
-    if (!args.replace)
-      free(outfile);
-    DestroyExceptionInfo(e);
+    free(outfile);
+    DestroyExceptionInfo(&e);
     DestroyMagick();
   }
   
   free(args.infiles);
-
   return returnvalue;
-
 }
 
 void upscaleImage(const char *infile, const char *outfile, int res, ExceptionInfo *e) {
@@ -67,8 +72,8 @@ void upscaleImage(const char *infile, const char *outfile, int res, ExceptionInf
   ImageInfo *imgInfo = CloneImageInfo(0); // initialize empty image
   strcpy(imgInfo->filename, infile);
   Image *img = ReadImage(imgInfo, e);
-  Image *out;
   CatchException(e);
+  Image *out;
   if (img != NULL) {
     unsigned int x = img->columns;
     unsigned int y = img->rows;
