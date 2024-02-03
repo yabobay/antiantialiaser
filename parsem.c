@@ -75,6 +75,7 @@ struct arguments parsem(int argc, char **argv) {
   arguments.directory = NULL;
   arguments.replace = false;
   arguments.pretend = false;
+  arguments.filetype = NULL;
  
   // we use ARGP_NO_EXIT so that main can free arguments.infiles later
   arguments.e = argp_parse(&argp, argc, argv, ARGP_NO_EXIT, 0, &arguments);
