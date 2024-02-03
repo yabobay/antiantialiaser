@@ -18,9 +18,9 @@ int main(int argc, char *argv[]) {
   struct arguments args = parsem(argc, argv);
 
   if (args.outfile && args.infilec > 1)
-    puts("Error: can't process multiple files with the -o option");
-  else if (args.replace && (args.outfile || args.directory))
-    puts("Error: can't use the -r option with -o or -d");
+    puts("Error: can't process multiple files with the -o option.\nTry -d instead to specify a directory.");
+  else if (args.replace && (args.outfile || args.directory || args.filetype))
+    puts("Error: can't use the -r option with any of: -o, -d, -f");
   else if (args.outfile && args.directory)
     puts("Error: can't use the -o and -d flags together");
   // ↓ closest possible approximate to "if --help was not called"
@@ -44,6 +44,12 @@ int main(int argc, char *argv[]) {
         outfile = strdup(args.outfile);
       else
         outfile = strdup(args.infiles[i]);
+
+      if (args.filetype) {
+        char *tmp = outfile;
+        outfile = changeCoda(tmp, args.filetype);
+        free(tmp);
+      }
 
       if (!args.replace)
         while (fileExists(outfile)) {

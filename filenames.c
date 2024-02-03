@@ -33,6 +33,14 @@ char *filenameOnset(const char *filename) {
   return strndup(filename, (strlen(filename) - l) * sizeof(char));
 }
 
+char *changeCoda(const char *filename, const char *coda) {
+  char *onset = filenameOnset(filename);
+  char *newFilename = malloc((strlen(onset) + strlen(coda) + 2) * sizeof(char));
+  sprintf(newFilename, "%s.%s", onset, coda);
+  free(onset);
+  return newFilename;
+}
+
 char *duplicateFilename(const char *filename) {
   char *x = malloc(sizeof(char) *
                    (strlen(filename) + strlen(FILENAME_INDICATION) - 1));

@@ -14,6 +14,7 @@ error_t parse_opt (int key, char *arg, struct argp_state *state);
 
 struct argp_option options[] = {
   {"output", 'o', "FILENAME", 0, "File to output to (optional)"},
+  {"filetype", 'f', "EXTENSION", 0, "Filetype to convert to (optional)"},
   {"dir", 'd', "DIRECTORY", 0, "Directory to dump file(s) into"},
   {"size", 's', "N", 0, "Resolution to output (default: 720)"},
   {"replace", 'r', 0, 0, "Replace original files. (default: no)"},
@@ -28,7 +29,6 @@ struct argp argp = {
 
 error_t parse_opt (int key, char *arg, struct argp_state *state) {
   struct arguments *arguments = state->input;
-  /* printf("%c: %s\n", iswprint(key) ? key : '_', arg); */
   if (iswprint(key))
     switch (key) {
     case 'v':
@@ -49,6 +49,9 @@ error_t parse_opt (int key, char *arg, struct argp_state *state) {
     case 'p':
       arguments->pretend = true;
       arguments->verbose = true;
+      break;
+    case 'f':
+      arguments->filetype = arg;
       break;
     }
   else if (arg) { // argument is anonymous

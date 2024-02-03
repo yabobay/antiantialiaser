@@ -13,6 +13,7 @@ struct arguments {
   bool replace;
   bool pretend;
   error_t e; // basically just used in case of anything;
+  char *filetype;
 };
 
 struct arguments parsem(int argc, char **argv);
