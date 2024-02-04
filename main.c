@@ -53,6 +53,7 @@ int main(int argc, char *argv[]) {
 
       if (!args.replace)
         while (fileExists(outfile)) {
+          // keep calling duplicateFilename until there's an unused filename that we can use
           char *tmp = outfile;
           outfile = duplicateFilename(tmp);
           free(tmp);

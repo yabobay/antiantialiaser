@@ -2,14 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #define FILENAME_INDICATION " (copy)."
 
 bool fileExists(const char* filename) {
-  bool v = true;
-  FILE *f = fopen(filename, "r");
-  f ? fclose(f) : (v = false);
-  return v;
+  return access(filename, F_OK) == 0;
 }
 
 // includes the character
