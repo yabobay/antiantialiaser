@@ -80,7 +80,7 @@ void upscaleImage(const char *infile, const char *outfile, int res, ExceptionInf
   strcpy(imgInfo->filename, infile);
   Image *img = ReadImage(imgInfo, e);
   CatchException(e);
-  Image *out;
+  Image *out = NULL;
   if (img != NULL) {
     unsigned int x = img->columns;
     unsigned int y = img->rows;

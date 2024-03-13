@@ -14,7 +14,7 @@ bool fileExists(const char* filename) {
 char *chopUntilChar(const char *str, char c) {
   char *chr = strrchr(str, c);
   if (!chr)
-    return "";
+    return strdup(str);
   return strdup(chr + 1);
 }
 
