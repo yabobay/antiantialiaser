@@ -23,8 +23,6 @@ char *filenameCoda(const char *filename) {
 }
 
 char *filenameOnset(const char *filename) {
-  /* slightly wasteful but i literally don't care. feel free to fix it
-     if you want to */
   char *coda = filenameCoda(filename);
   int l = strlen(coda) + 1;
   free(coda);

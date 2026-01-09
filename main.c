@@ -11,11 +11,11 @@
 void upscaleImage(const char *infile, const char *outfile, int res, ExceptionInfo *e);
 
 int main(int argc, char *argv[]) {
-  int returnvalue = 1;
-
   if (argc < 2)
     argv[argc++] = "--help"; // help 🥲
   struct arguments args = parsem(argc, argv);
+
+  int ret = 1;
 
   if (args.outfile && args.infilec > 1)
     puts("Error: can't process multiple files with the -o option.\nTry -d instead to specify a directory.");
@@ -23,8 +23,10 @@ int main(int argc, char *argv[]) {
     puts("Error: can't use the -r option with any of: -o, -d, -f");
   else if (args.outfile && args.directory)
     puts("Error: can't use the -o and -d flags together");
-  // ↓ closest possible approximate to "if --help was not called"
-  else if (returnvalue = 0, args.infilec) {
+  else
+    ret = 0;
+
+  if (!ret && args.infilec) {
     char *outfile = NULL;
     InitializeMagick(NULL);
     ExceptionInfo e;
@@ -69,9 +71,9 @@ int main(int argc, char *argv[]) {
     DestroyExceptionInfo(&e);
     DestroyMagick();
   }
-  
+
   free(args.infiles);
-  return returnvalue;
+  return ret;
 }
 
 void upscaleImage(const char *infile, const char *outfile, int res, ExceptionInfo *e) {
